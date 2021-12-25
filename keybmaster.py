@@ -163,9 +163,9 @@ def _draw_label_box(screen, color, disp_label, head_text, metrics=False):
     pygame.draw.rect(screen, (16.5, 61.6, 19.3), label_box)
 
     screen.blit(
-            font.render(head_text[0], True, (255, 255, 255)),
-            (_x + 5, _y)
-            )
+        font.render(head_text[0], True, (255, 255, 255)),
+        (_x + 5, _y)
+    )
 
     if metrics:
         _x = disp_label.midleft[0]
@@ -385,7 +385,6 @@ def main():
     checkSpell.start()
 
     SPEAKER = su.TextSpeak()
-    SPEAKER.start()
 
     assert checkSpell.is_alive() is True
 
@@ -752,14 +751,14 @@ def main():
                     screen.blit(
                         font.render(_disp_text[i], True, (255, 255, 255)),
                         (_x, _y)
-                        )
+                    )
                     _y += line_size
 
             # display the last line from transient buffer
             screen.blit(
-                    font.render(''.join(letters), True, (255, 255, 255)),
-                    (_x, _y)
-                    )
+                font.render(''.join(letters), True, (255, 255, 255)),
+                (_x, _y)
+            )
 
             text_stat = _text_counter(_live_text[0],
                                       ''.join(_disp_text) + ''.join(letters)

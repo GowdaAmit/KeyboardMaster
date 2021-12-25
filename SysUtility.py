@@ -6,7 +6,7 @@ SYNOPSIS
 ========
 
 ::
-    python3 wormy.py
+    python3 
 
 DESCRIPTION
 ===========
@@ -50,175 +50,160 @@ SEE ALSO
 
 @author: Amit Gowda
 """
-import ctypes
-import ctypes.wintypes
-from ctypes.wintypes import BOOL, HWND, RECT
-from ctypes import windll
-from ctypes import POINTER, WINFUNCTYPE
-import time
-import psutil
-from collections import defaultdict
-import pyttsx3 as speech
+# import ctypes
+# import ctypes.wintypes
+# from ctypes.wintypes import BOOL, HWND, RECT
+# from ctypes import windll
+# from ctypes import POINTER, WINFUNCTYPE
+# import time
+# import psutil
+# from collections import defaultdict
+import subprocess
 from threading import Thread
 
 
 class TextSpeak(Thread):
 
     def __init__(self):
-        Thread.__init__(self)
-        self.engine = speech.init()
-        self.engine.setProperty('rate', 125)
+        pass
 
-    def speak(self, text):
-        assert len(text)>0
+    def speak(self, text, pitch: int = 50):
+        assert len(text) > 0
 
-        self.engine.say(text)
-        self.engine.runAndWait()
-
-    def getSpeakerEngine():
-        return self.engine
-
-    def run(self):
-        while True:
-            time.sleep(1)
-
-    def __del__(self):
-        self.engine.stop()
+        subprocess.run(['espeak', f'-p{pitch}', text])
 
 
-class LASTINPUTINFO(ctypes.Structure):
-    _fields_ = [
-        ('cbSize', ctypes.wintypes.UINT),
-        ('dwTime', ctypes.wintypes.DWORD)
-        ]
+# class LASTINPUTINFO(ctypes.Structure):
+#     _fields_ = [
+#         ('cbSize', ctypes.wintypes.UINT),
+#         ('dwTime', ctypes.wintypes.DWORD)
+#         ]
 
-NOSIZE = 1
-NOMOVE = 2
-TOPMOST = -1
-NOT_TOPMOST = -2
+# NOSIZE = 1
+# NOMOVE = 2
+# TOPMOST = -1
+# NOT_TOPMOST = -2
 
-prototype = WINFUNCTYPE(BOOL, HWND, POINTER(RECT))
-paramflags = (1, 'hwnd'), (2, 'lprect')
-GetWindowRect = prototype(('GetWindowRect', windll.user32), paramflags)
-SetWindowPos = windll.user32.SetWindowPos
+# prototype = WINFUNCTYPE(BOOL, HWND, POINTER(RECT))
+# paramflags = (1, 'hwnd'), (2, 'lprect')
+# GetWindowRect = prototype(('GetWindowRect', windll.user32), paramflags)
+# SetWindowPos = windll.user32.SetWindowPos
 
-PLASTINPUTINFO = ctypes.POINTER(LASTINPUTINFO)
-user32 = ctypes.windll.user32
-GetLastInputInfo = user32.GetLastInputInfo
-GetLastInputInfo.restype = ctypes.wintypes.BOOL
-GetLastInputInfo.argtypes = [PLASTINPUTINFO]
+# PLASTINPUTINFO = ctypes.POINTER(LASTINPUTINFO)
+# user32 = ctypes.windll.user32
+# GetLastInputInfo = user32.GetLastInputInfo
+# GetLastInputInfo.restype = ctypes.wintypes.BOOL
+# GetLastInputInfo.argtypes = [PLASTINPUTINFO]
 
-kernel32 = ctypes.windll.kernel32
-GetTickCount = kernel32.GetTickCount
-Sleep = kernel32.Sleep
-
-
-def wait_until_idle(idle_time=60):
-    """
-    Wait for the inactivity that waits for set time before initiating
-    action set forth such as Shutdown or Sleep
-
-    Parameters
-    ----------
-    idle_time : TYPE, optional
-        DESCRIPTION. The default is 60.
-
-    Returns
-    -------
-    None.
-
-    """
-    idle_time_ms = int(idle_time * 1000)
-    liinfo = LASTINPUTINFO()
-    liinfo.cbSize = ctypes.sizeof(liinfo)
-    while True:
-        GetLastInputInfo(ctypes.byref(liinfo))
-        elapsed = GetTickCount() - liinfo.dwTime
-        if elapsed >= idle_time_ms:
-            break
-        Sleep(idle_time_ms - elapsed or 1)
+# kernel32 = ctypes.windll.kernel32
+# GetTickCount = kernel32.GetTickCount
+# Sleep = kernel32.Sleep
 
 
-def wait_until_active(tol=5):
-    """
-    When the system is in inactive mode, this process signals the
-    beginning od the user activity
+# def wait_until_idle(idle_time=60):
+#     """
+#     Wait for the inactivity that waits for set time before initiating
+#     action set forth such as Shutdown or Sleep
 
-    Parameters
-    ----------
-    tol : TYPE, optional
-        DESCRIPTION. The default is 5.
+#     Parameters
+#     ----------
+#     idle_time : TYPE, optional
+#         DESCRIPTION. The default is 60.
 
-    Returns
-    -------
-    None.
+#     Returns
+#     -------
+#     None.
 
-    """
-    liinfo = LASTINPUTINFO()
-    liinfo.cbSize = ctypes.sizeof(liinfo)
-    lasttime = None
-    delay = 1
-    maxdelay = int(tol * 1000)
-    while True:
-        GetLastInputInfo(ctypes.byref(liinfo))
-        if lasttime is None:
-            lasttime = liinfo.dwTime
-        if lasttime != liinfo.dwTime:
-            break
-        delay = min(2 * delay, maxdelay)
-        Sleep(delay)
+#     """
+#     idle_time_ms = int(idle_time * 1000)
+#     liinfo = LASTINPUTINFO()
+#     liinfo.cbSize = ctypes.sizeof(liinfo)
+#     while True:
+#         GetLastInputInfo(ctypes.byref(liinfo))
+#         elapsed = GetTickCount() - liinfo.dwTime
+#         if elapsed >= idle_time_ms:
+#             break
+#         Sleep(idle_time_ms - elapsed or 1)
 
 
-def test():
-    print('Waiting for 10 seconds of no user input...')
-    wait_until_idle(10)
-    user32.MessageBeep(0)
-    print('Ok, now do something')
-    wait_until_active(1)
-    user32.MessageBeep(0)
-    print('Done')
+# def wait_until_active(tol=5):
+#     """
+#     When the system is in inactive mode, this process signals the
+#     beginning od the user activity
+
+#     Parameters
+#     ----------
+#     tol : TYPE, optional
+#         DESCRIPTION. The default is 5.
+
+#     Returns
+#     -------
+#     None.
+
+#     """
+#     liinfo = LASTINPUTINFO()
+#     liinfo.cbSize = ctypes.sizeof(liinfo)
+#     lasttime = None
+#     delay = 1
+#     maxdelay = int(tol * 1000)
+#     while True:
+#         GetLastInputInfo(ctypes.byref(liinfo))
+#         if lasttime is None:
+#             lasttime = liinfo.dwTime
+#         if lasttime != liinfo.dwTime:
+#             break
+#         delay = min(2 * delay, maxdelay)
+#         Sleep(delay)
 
 
-def getProcessList():
-    """
-    gets the the top 7 windows process list for display
-
-    Returns
-    -------
-    TYPE
-        DESCRIPTION.
-
-    """
-    procs = defaultdict(int)
-    for process in psutil.process_iter(['pid', 'name']):
-        procs[process.info['name']] += 1
-    # sort the dict to list the large first
-    x = sorted(procs.items(), key=lambda x: x[1], reverse=True)
-    # return the top 7 proceses with high instances
-    return x[:7]
+# def test():
+#     print('Waiting for 10 seconds of no user input...')
+#     wait_until_idle(10)
+#     user32.MessageBeep(0)
+#     print('Ok, now do something')
+#     wait_until_active(1)
+#     user32.MessageBeep(0)
+#     print('Done')
 
 
-def timeRemaining(seconds: int):
-    """
-    Parameters
-    ----------
-    seconds : TYPE
-        DESCRIPTION.
+# def getProcessList():
+#     """
+#     gets the the top 7 windows process list for display
 
-    Returns
-    -------
-    None.
+#     Returns
+#     -------
+#     TYPE
+#         DESCRIPTION.
 
-    >>> timeRemaining(1000)
-     (0, 16, 40)
+#     """
+#     procs = defaultdict(int)
+#     for process in psutil.process_iter(['pid', 'name']):
+#         procs[process.info['name']] += 1
+#     # sort the dict to list the large first
+#     x = sorted(procs.items(), key=lambda x: x[1], reverse=True)
+#     # return the top 7 proceses with high instances
+#     return x[:7]
 
-    """
-    mins, seconds = divmod(seconds, 60)
-    hours, mins = divmod(mins, 60)
-    return (hours, mins, seconds)
 
+# def timeRemaining(seconds: int):
+#     """
+#     Parameters
+#     ----------
+#     seconds : TYPE
+#         DESCRIPTION.
+
+#     Returns
+#     -------
+#     None.
+
+#     >>> timeRemaining(1000)
+#      (0, 16, 40)
+
+#     """
+#     mins, seconds = divmod(seconds, 60)
+#     hours, mins = divmod(mins, 60)
+#     return (hours, mins, seconds)
 
 if __name__ == '__main__':
     speak = TextSpeak()
     speak.speak('Press a button to continue')
-
