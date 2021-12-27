@@ -1,0 +1,5 @@
+pygame==2.1.1
+pyperclip==1.8.2
+pyspellchecker==0.6.2
+setuptools==57.4.0
+spellchecker==0.4
